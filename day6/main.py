@@ -1,72 +1,53 @@
-
+import copy
 
 def ingest_data_pt1():
-    stacks = [[] for i in range(9)]
-    instructions = []
+    sequence = ""
 
     with open("input.txt") as file:
         for line in file:
-            if line[0] == '[':
-                for i in range(9):
-                    item_let = line[i*4 + 1]
-                    if item_let != ' ':
-                        stacks[i].append(item_let)
+            sequence = line.strip()
 
-            if line[0] == 'm':
-                line = line.strip()
-                line = line[5:]
+    return sequence
 
-                num_move = int(line[:line.index(' ')])
-                line = line[line.index(' ')+1:]
+def find_first_marker_pt1(sequence):
+    for i in range(3, len(sequence)):
+        if sequence[i] not in sequence[i-3:i]\
+                and sequence[i-1] not in sequence[i-3:i-1]\
+                and sequence[i-2] not in sequence[i-3:i-2]:
+            return i + 1
 
-                to_stack = int(line[line.rindex(' ')+1:])
-                line = line[:line.rindex(' ')]
+def find_first_marker_pt2(sequence, length):
+    last_appearance = {}
 
-                from_stack = int(line[line.index(' ')+1:line.rindex(' ')])
+    for i in range(len(sequence)):
+        new_char = sequence[i]
 
-                instructions.append([num_move, to_stack, from_stack])
+        if i >= length:
+            start_of_packet = i-length
 
-    for stack in stacks:
-        stack.reverse()
+            return_bool = True
+            for j in range(i-length, i+1):
+                char = sequence[j]
+                print(j)
+                if char in last_appearance:
+                    array = copy.deepcopy(last_appearance[char])
+                    array.pop()
+                    if len(array) > 0 and array.pop() >= start_of_packet:
+                        print("breaking ", i)
+                        return_bool = False
+                        break
 
-    return stacks, instructions
+            if return_bool:
+                return i
 
-def process_stacks_pt1(stacks, instructions):
-    for instruction in instructions:
-        num_move, to_stack, from_stack = instruction
-        for i in range(num_move):
-            stacks[to_stack-1].append(stacks[from_stack-1].pop())
-
-    return stacks
-
-def process_stacks_pt2(stacks, instructions):
-    for instruction in instructions:
-        num_move, to_stack, from_stack = instruction
-        items_to_move = stacks[from_stack-1][len(stacks[from_stack-1])-num_move:]
-
-        print(items_to_move)
-        stacks[from_stack - 1] = stacks[from_stack-1][:len(stacks[from_stack - 1]) - num_move]
-
-        for item in items_to_move:
-            stacks[to_stack-1].append(item)
-
-    return stacks
+        if new_char in last_appearance:
+            last_appearance[new_char].append(i)
+        else:
+            last_appearance[new_char] = [i]
 
 if __name__ == '__main__':
-    test1 = ['a', 'b', 'c']
+    sequence = ingest_data_pt1()
 
-    print(test1)
-    test1.reverse()
-    print(test1)
-    print(test1.pop())
-    print(test1)
-
-    stacks, instructions = ingest_data_pt1()
-
-    stacks = process_stacks_pt2(stacks, instructions)
-
-    for stack in stacks:
-        print(stack.pop())
-
+    print(find_first_marker_pt2(sequence, 14))
 
 

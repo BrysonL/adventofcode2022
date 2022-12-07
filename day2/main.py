@@ -1,22 +1,18 @@
-# This is a sample Python script.
-
-# Press ⇧F10 to execute it or replace it with your code.
-# Press Double ⇧ to search everywhere for classes, files, tool windows, actions, and settings.
-
-
 def ingest_data_pt1():
+    # represent each game as an array where the first value is the oppo choice (rock paper scis) ans second is your
+    # choice
     games = []
     with open("input.txt") as file:
         for line in file:
-            oppo_choice = line[0]
-            if oppo_choice == 'A':
+            oppo_choice = line[0]  # first char is oppo's
+            if oppo_choice == 'A':  # translation given in prompt
                 oppo_choice = 'R'
             elif oppo_choice == 'B':
                 oppo_choice = 'P'
             else:
                 oppo_choice = 'S'
 
-            your_choice = line[2]
+            your_choice = line[2]  # second char is yours
 
             if your_choice == 'X':
                 your_choice = 'R'
@@ -29,6 +25,7 @@ def ingest_data_pt1():
     return games
 
 def ingest_data_pt2():
+    # same as pt1 with different translation for your choice
     games = []
     with open("input.txt") as file:
         for line in file:
@@ -64,6 +61,7 @@ def ingest_data_pt2():
     return games
 
 def score_games(games):
+    # scoring guideline given in prompt
     score = 0
     for game in games:
         oppo = game[0]

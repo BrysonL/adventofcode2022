@@ -43,54 +43,6 @@ def ingest_data_pt1():
 
     return grid, instructions, starting_pos
 
-def move_knots(grid, instructions, starting_pos):
-    head_pos = [starting_pos[0], starting_pos[1]]  # explicitly assign to get around alias instead of deep copy
-    tail_pos = [starting_pos[0], starting_pos[1]]
-
-    for instruction in instructions:
-        dir = instruction[0]
-        moves = instruction[1]
-
-        while moves > 0:
-            moves -= 1
-
-            # move the head knot
-            if dir == 'U':
-                head_pos[1] += 1
-            if dir == 'D':
-                head_pos[1] -= 1
-            if dir == 'R':
-                head_pos[0] += 1
-            if dir == 'L':
-                head_pos[0] -= 1
-
-            # decide if we need to move the tail
-            if dir in ['U', 'D']:  # vert move
-                if head_pos[1] - tail_pos[1] > 1: # head is 2 above of the tail
-                    tail_pos[1] += 1
-                    if tail_pos[0] != head_pos[0]: # if there is also a diagonal space, move horiz
-                        tail_pos[0] = head_pos[0]
-                elif tail_pos[1] - head_pos[1] > 1: # head is 2 below the tail
-                    tail_pos[1] -= 1
-                    if tail_pos[0] != head_pos[0]: # if there is also a diagonal space, move horiz
-                        tail_pos[0] = head_pos[0]
-
-            if dir in ['L', 'R']:  # horiz move
-                if head_pos[0] - tail_pos[0] > 1: # head is 2 in front of the tail
-                    tail_pos[0] += 1
-                    if tail_pos[1] != head_pos[1]: # if there is also a diagonal space, move vert
-                        tail_pos[1] = head_pos[1]
-                elif tail_pos[0] - head_pos[0] > 1: # head is 2 behind the tail
-                    tail_pos[0] -= 1
-                    if tail_pos[1] != head_pos[1]: # if there is also a diagonal space, move vert
-                        tail_pos[1] = head_pos[1]
-
-            # update grid with new tail pos
-            print(head_pos, tail_pos)
-            grid[tail_pos[1]][tail_pos[0]] = 1
-
-    return grid
-
 def move_knots(grid, instructions, starting_pos, num_lengths):
     # explicitly assign to get around alias instead of deep copy
     rope_poss = [[starting_pos[0], starting_pos[1]] for i in range(num_lengths)]

@@ -4,7 +4,7 @@ def ingest_data_pt1():
     beacons = []
     sensors = []
     # ingest the grid and create nodes for each
-    with open('input_test.txt') as file:
+    with open('input.txt') as file:
         for line in file:
             line = line.strip()
             line_split = line.split(': ')
@@ -26,12 +26,7 @@ def ingest_data_pt1():
             beacons.append([beacon_x, beacon_y])
     return beacons, sensors
 
-# result is off by one, idk why and don't care to figure it out
-def find_unavailable_positions(target_row, target_row_y, row_x_offset, sensors, beacons):
-    # looks like we shouldn't count known beacon locations
-    for beacon in beacons:
-        if beacon[1] == target_row_y:
-            target_row[beacon[0] - row_x_offset] = 1
+def find_unavailable_positions_pt1(target_row, target_row_y, row_x_offset, sensors, beacons):
 
     for sensor_loc, taxi_distance in sensors:
         taxi_distance = taxi_distance - abs(sensor_loc[1] - target_row_y)
@@ -40,6 +35,32 @@ def find_unavailable_positions(target_row, target_row_y, row_x_offset, sensors, 
             target_row[i] = 1
 
     return target_row
+
+
+def find_unavailable_positions_pt2(target_row_y, row_x_offset, sensors, beacons, x_lim):
+    spaces_covered = []
+    for sensor_loc, taxi_distance in sensors:
+        # print(sensor_loc, taxi_distance, target_row_y)
+        taxi_distance = taxi_distance - abs(sensor_loc[1] - target_row_y)
+        # print(taxi_distance)
+        sensor_x_off = sensor_loc[0] - row_x_offset
+        if taxi_distance >= 0:
+            spaces_covered.append([sensor_x_off - taxi_distance, sensor_x_off + taxi_distance])
+
+    # print(spaces_covered)
+    spaces_covered.sort(key=lambda x: x[0])
+    # print(spaces_covered)
+
+    last_covered = max(0 - row_x_offset, spaces_covered[0][1])
+    for i in range(1, len(spaces_covered)):
+        space = spaces_covered[i]
+        # print(space, last_covered)
+        if last_covered < space[0] - 1 and [last_covered + 1 + row_x_offset, target_row_y] not in beacons:
+            return last_covered + 1 + row_x_offset
+        if last_covered < space[1]:
+            last_covered = space[1]
+        if last_covered > x_lim:
+            return None
 
 if __name__ == '__main__':
     beacons, sensors = ingest_data_pt1()
@@ -50,24 +71,23 @@ if __name__ == '__main__':
     # pt1
     max_x = max([max([x for x, y in beacons]), max([x[0] for x, y in sensors])])
     min_x = min([min([x for x, y in beacons]), min([x[0] for x, y in sensors])])
-    print(min_x, max_x)
+    # print(min_x, max_x)
     target_row = [0 for i in range(min_x, max_x+1)]
     row_x_offset = min_x  # subtract the offset to get the index
     target_row_y = 10
-    target_row = find_unavailable_positions(target_row, target_row_y, row_x_offset, sensors, beacons)
-    print(sum(target_row))
+    target_row = find_unavailable_positions_pt1(target_row, target_row_y, row_x_offset, sensors, beacons)
+    # print(sum(target_row))
 
     # pt 2 (too slow for full and doesn't work on example)
     max_x = max([max([x for x, y in beacons]), max([x[0] for x, y in sensors])])
     min_x = min([min([x for x, y in beacons]), min([x[0] for x, y in sensors])])
-    print(min_x, max_x)
+    # print(min_x, max_x)
     row_x_offset = min_x  # subtract the offset to get the index
+    x_lim = 4000000
     x_min = 0 - row_x_offset
-    x_max = 20 - row_x_offset
-    for target_row_y in range(0, 20):
-        target_row = [0 for i in range(min_x, max_x+1)]
-        target_row = find_unavailable_positions(target_row, target_row_y, row_x_offset, sensors, beacons)
-        target_row_zone = target_row[x_min:x_max]
-        if 0 in target_row_zone:
-            x_index = target_row_zone.index(0)
-            print(x_index*4000000 + target_row_y)
+    x_max = x_lim - row_x_offset
+    for target_row_y in range(0, x_lim + 1):
+        target_row = find_unavailable_positions_pt2(target_row_y, row_x_offset, sensors, beacons, x_lim)
+        if target_row is not None:
+            print(target_row, target_row_y, target_row*4000000 + target_row_y)
+        # break
